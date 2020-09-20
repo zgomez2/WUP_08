@@ -1,0 +1,36 @@
+---
+title: "simpleRegress"
+author: "Dr K"
+date: "November 5, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## make a simple regression model
+
+```{r}
+bears <- read.csv(file="BEARS.csv",header = TRUE)
+```
+
+## Model LENGTH ~ NECK  this is an example  
+
+```{r}
+simp <- lm(LENGTH~NECK,data=bears)
+plot(LENGTH~NECK,data=bears)
+abline(simp)
+summary.lm(simp)
+```
+
+## now predict the length of a bear who has a neck of 17, 22 and 26
+
+
+```{r}
+new <- data.frame(NECK=c(17,22,26))
+predict(simp,new)
+predict(simp,new,se.fit=TRUE)
+```
+## Surely there is another variable that can better predict LENGTH than NECK. Find one and compare its performance to that of neck by it value of Adjusted-Rsquared (bigger is better).
+
