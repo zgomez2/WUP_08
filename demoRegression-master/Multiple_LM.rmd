@@ -1,0 +1,168 @@
+---
+title: "MultipleRegress"
+author: "Dr K"
+date: "November 5, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+bears <- read.csv(file="BEARS.csv",header = TRUE)
+```
+## make a multiple regression model predicting LENGTH, start with full model using p-value approach   
+
+```{r}
+fullup <- lm(LENGTH~ .,data=bears)
+summary.lm(fullup)
+```
+###Take out AGE  
+
+```{r}
+MODL7 <- lm(LENGTH~ .-AGE,data=bears)
+summary.lm(MODL7)
+```
+###Now take out NECK  
+
+```{r}
+MODL6 <- lm(LENGTH~ .-AGE-NECK,data=bears)
+summary.lm(MODL6)
+```
+###Remove WEIGHT next
+```{r}
+MODL5 <- lm(LENGTH~ .-AGE-NECK-WEIGHT,data=bears)
+summary.lm(MODL5)
+```
+###Now remove HEADWTH    
+
+```{r}
+MODL4 <- lm(LENGTH~ .-AGE-NECK-HEADWTH-WEIGHT,data=bears)
+summary.lm(MODL4)
+```
+
+```{r}
+MODL3 <- lm(LENGTH~ .-AGE-NECK-HEADWTH-WEIGHT-SEX,data=bears)
+summary.lm(MODL3)
+```
+
+###AdjR^2 Started going from 4 to 3 - so stop at 4
+
+
+
+## make a multiple regression model predicting LENGTH, start with full model using Adj$R^2$ approach 
+
+
+
+##Model LENGTH ~ .     ("." is shorthand for all variables )
+
+```{r}
+fullup <- lm(LENGTH~ .,data=bears)
+summary.lm(fullup)
+```
+```{r}
+fullup.1 <- lm(LENGTH~ . -AGE,data=bears)
+summary.lm(fullup.1)
+```
+```{r}
+fullup.2<- lm(LENGTH~ .-MONTH,data=bears)
+summary.lm(fullup.2)
+```
+
+```{r}
+fullup.3<- lm(LENGTH~ .-SEX,data=bears)
+summary.lm(fullup.3)
+```
+```{r}
+fullup.4 <- lm(LENGTH~ . -HEADLEN,data=bears)
+summary.lm(fullup.4)
+```
+```{r}
+fullup.5<- lm(LENGTH~ .-HEADWTH,data=bears)
+summary.lm(fullup.5)
+```
+
+```{r}
+fullup.6<- lm(LENGTH~ .-NECK,data=bears)
+summary.lm(fullup.6)
+```
+```{r}
+fullup.7<- lm(LENGTH~ .-CHEST,data=bears)
+summary.lm(fullup.7)
+```
+
+```{r}
+fullup.8<- lm(LENGTH~ .-WEIGHT,data=bears)
+summary.lm(fullup.8)
+```
+  
+###At this point we pick the best one, then from there we would take up with that model and one-by-one take out one of the other explanitory variables and select the best of those - and repeat  The one where we took out AGE is best  with Adj$R^2$ .8816
+
+```{r}
+fullup.1.2<- lm(LENGTH~ .-AGE-MONTH,data=bears)
+summary.lm(fullup.1.2)
+```
+
+```{r}
+fullup.1.3<- lm(LENGTH~ .-AGE-SEX,data=bears)
+summary.lm(fullup.1.3)
+```
+```{r}
+fullup.1.4 <- lm(LENGTH~ . -AGE-HEADLEN,data=bears)
+summary.lm(fullup.1.4)
+```
+```{r}
+fullup.1.5<- lm(LENGTH~ .-AGE-HEADWTH,data=bears)
+summary.lm(fullup.1.5)
+```
+
+```{r}
+fullup.1.6<- lm(LENGTH~ .-AGE-NECK,data=bears)
+summary.lm(fullup.1.6)
+```
+```{r}
+fullup.1.7<- lm(LENGTH~ .-AGE-CHEST,data=bears)
+summary.lm(fullup.1.7)
+```
+
+```{r}
+fullup.1.8<- lm(LENGTH~ .-AGE-WEIGHT,data=bears)
+summary.lm(fullup.1.8)
+```
+###At this point we pick the best one again, then from there we would take up with that model and one-by-one take out one of the other explanitory variables and select the best of those - and repeat  This time we have a tie between taking out (AGE and HEADLEN) or taking out (AGE and NECK) both have Adj$R^2$ .8839  
+  
+####This is a pain we must have a better way  
+  
+#now automate
+
+
+```{r}
+library(leaps)
+regsubsets.out <-
+    regsubsets(LENGTH ~ .,
+               data = bears,
+               nbest = 1,       # 1 best model for each number of predictors
+               nvmax = NULL,    # NULL for no limit on number of variables
+               force.in = NULL, force.out = NULL,
+               method = "exhaustive")
+
+summary.out <- summary(regsubsets.out)
+as.data.frame(summary.out$outmat)
+library(car)
+subsets(regsubsets.out,statistic="adjr2",legend="bottomright",main="Adjusted R^2")
+```
+  
+##Which is best??  
+
+```{r}
+which.max(summary.out$adjr2)
+```
+```{r}
+summary.out$which[4,]
+```
+
+```{r}
+best.model <- lm(LENGTH~MONTH+SEX+HEADLEN+CHEST,data=bears)
+summary(best.model)
+```
+
