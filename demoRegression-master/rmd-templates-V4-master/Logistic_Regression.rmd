@@ -1,0 +1,57 @@
+---
+title: "Logistic Regression Donner Party"
+author: "Dr K"
+date: "November 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+require(tigerstats)
+require(Sleuth2)
+donner <- case2001
+bee <- case2002
+```
+
+## make a simple barchart to see if sex might play a role  
+
+
+```{r}
+barchartGC(~Sex + Status , data=donner)
+chisqtestGC(~Status + Sex, data=donner)
+fishtab <- xtabs(~Status + Sex, data=donner)
+fisher.test(fishtab)
+plot(Age~Status,data=donner,main="survive v.s. age")
+t.test(Age~Status,data=donner)
+```
+##Now start logistic regression model of Status explained by Age
+
+```{r}
+ageModl <- glm(Status ~ Age, data=donner, family=binomial)
+summary.glm(ageModl)
+ageSexModl <- glm(Status ~ Age + Sex, data=donner, family=binomial)
+summary.glm(ageSexModl)
+```
+                   
+##Use anova with test=Chisq to compare logistic regression models
+
+```{r}
+anova(ageModl,ageSexModl,test="Chisq")
+```
+## Now model cancer in bee keepers, stepAIC is like regsubsets searching for best model
+
+```{r}
+beeCancer <- glm(LC ~ ., data = bee, family = binomial)
+summary.glm(beeCancer)
+library(MASS)
+refindMod <- stepAIC(beeCancer, trace = 1)
+summary.glm(refindMod)
+```
+```{r}
+## three similiar test LRT = likelyhood ratio test, Rao is also the "score" test - see statistical sleuth chap 20 and chap 21
+anova(refindMod,beeCancer,test = "Chisq")
+anova(refindMod,beeCancer,test = "LRT")
+anova(refindMod,beeCancer,test = "Rao")
+```
+
