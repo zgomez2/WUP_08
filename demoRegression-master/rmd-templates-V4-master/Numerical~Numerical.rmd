@@ -1,0 +1,93 @@
+---
+title: "Numerical~Numerical template"
+author: "Dr K"
+date: "November 25, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# simple regression
+
+This is a template to serve as an example (cut and paste, change variable names)  
+we use the ucdavis1 dataset from the tigerstats package.
+
+```{r include=FALSE}
+require(tidyverse)
+require(tigerstats)
+require(rgl)
+require(knitr)
+if(!require("rglwidget")) {install.packages("rglwidget");require("rglwidget")}
+data(ucdavis1)
+davisdata <- na.omit(ucdavis1)
+```
+
+
+###Plot scatterplot
+
+```{r}
+plot(Height~dadheight,data=davisdata)
+```
+
+##Now with ggplot - first select the basic data
+
+```{r}
+basicNN <- ggplot(davisdata,aes(y=Height,x=dadheight))
+```
+##Now add in scatterplot
+
+```{r}
+basicNN + geom_point()
+```
+  
+  
+###get fancy  
+
+
+```{r}
+basicNN + geom_point(aes(col=Sex)) 
+```
+  
+# Numerical results
+
+```{r}
+cor(Height~dadheight,data=davisdata)
+```
+
+# Inferential  (Build linear model)
+  
+```{r}
+model.1 <- lm(Height~dadheight,data=davisdata)
+summary.lm(model.1)
+```
+# now add the model fit to our plot
+  
+```{r}
+basicNN + geom_point(aes(col=Sex)) + geom_smooth(method=lm)
+``` 
+
+##Up the game to 2 regressors
+
+```{r}
+advNN <- ggplot(davisdata,aes(y=Height,x=dadheight,z=momheight))
+```
+```{r}
+model.2 <- lm(Height~dadheight + momheight,data=davisdata)
+summary.lm(model.2)
+``` 
+
+##Compare the 2 models note adjR^2 is larger Residual SE is smaller in model.2
+
+```{r}
+anova(model.1,model.2)
+```
+
+###Test show model.2 better than model.1 (p is low (.0027) so reject $H_0$ )
+  
+###Code below can be run as a chunk to get interactivity -- so far can't get knitted version to work  
+  
+```{r}
+plot3d(davisdata$Height,davisdata$dadheight,davisdata$momheight)
+```

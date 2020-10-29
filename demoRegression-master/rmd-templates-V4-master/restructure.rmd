@@ -1,0 +1,39 @@
+---
+title: "restructure.rmd"
+author: "Dr K"
+date: "7/5/2020"
+output: html_document
+---
+
+## Suppose you have a dataframe with the columns being numeric measurements of various features of interest.  Also suppose 
+## you want to run a one-way anova between these features - you can use gather, melt, or stack - we use a data frame from  
+## the internet with football player weights
+
+```{r}
+require(tidyverse)
+require(tigerstats)
+mydata <- read.csv("FootBallTeams.csv")
+ydata <- mydata %>% select(-dallas)
+```
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+dat <- gather(mydata, variable, value) 
+dat$variable <-as.factor(dat$variable)
+# note explicit use of as.factor
+```
+```{r}
+require(reshape2)
+dat2 <- melt(mydata)
+dat3 <- melt(mydata,id.vars = c(4),variable.name = "whichOnes") # id.vars - weird option
+```
+
+```{r}
+require(stats)
+noDenver <-stack(mydata,select=-Denver)                   
+
+```
+

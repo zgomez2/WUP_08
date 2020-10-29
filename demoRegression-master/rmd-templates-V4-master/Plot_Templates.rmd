@@ -1,0 +1,105 @@
+---
+title: "Plotting cross examples"
+author: "Dr K"
+date: "Year 2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r include=FALSE,echo=FALSE}
+require(tidyverse)
+require(tigerstats)
+data(ucdavis1)
+davisdata <- na.omit(ucdavis1)
+
+```
+
+# Boxplots Cat ~ Numerical
+
+
+
+```{r}
+boxplot(dadheight~Sex,data=ucdavis1)
+```
+  
+##Now with ggplot - first select the basic data
+
+```{r}
+basicCN <- ggplot(ucdavis1,aes(x=Sex,y=dadheight))
+```
+##Now add in boxplot
+
+```{r}
+basicCN + geom_boxplot()
+```
+  
+  
+###get fancy  
+
+```{r}
+basicCN + geom_boxplot(notch=TRUE,outlier.color = "red") + stat_boxplot(geom ='errorbar') + labs(title="Fancy notch boxplot \n with 2 lines")
+```
+
+  
+
+# Barcharts Cat ~ Cat
+
+
+```{r}
+barchartGC(~Seat+Sex,data=ucdavis1)
+```
+```{r}
+basicCC <- ggplot(davisdata,aes(x=Seat,fill=Sex))
+basicCC + geom_bar()
+basicCC + geom_bar(position=position_dodge())
+
+```
+
+
+
+##Scatterplots Numerical ~ Numerical  
+
+```{r}
+plot(Height~momheight,data=davisdata)
+```
+
+##Now we see why ggplot is so cool
+```{r}
+basicNN <- ggplot(davisdata,aes(x=Height,y=momheight))
+```
+##Now add scatterplot and fitted regression line + then add loess
+
+```{r}
+basicNN + geom_point() + geom_lm() + geom_smooth()
+```
+
+## Plotting model prediction and confidence bounds
+
+## First Read in the data
+
+```{r}
+theData <- read.csv(file="myData.csv",header = TRUE)
+```
+```{r}
+M1 <- lm(FINAL ~ EXAM1, data=theData) 
+summary.lm(M1)
+summary(M1)$adj.r.squared
+```
+
+#### Now lets see what the model predicts - Here is M1
+
+```{r}
+temp_var <- predict(M1,interval="confidence") 
+new_df <- cbind(theData, temp_var) %>% rename(lwrc=lwr,uprc=upr,fitc=fit)
+temp_var2 <- predict(M1,interval="prediction") 
+new_df2 <- cbind(new_df, temp_var2)  
+ggplot(new_df2, aes(EXAM1, FINAL))+
+  geom_point()+
+geom_line(aes(y=lwrc), color = "blue", linetype = "dashed")+
+    geom_line(aes(y=uprc), color = "blue", linetype = "dashed")+
+ geom_line(aes(y=lwr), color = "red", linetype = "dashed")+
+    geom_line(aes(y=upr), color = "red", linetype = "dashed")+ 
+    geom_smooth(method=lm, se=TRUE)
+
+```

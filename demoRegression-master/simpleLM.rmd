@@ -1,6 +1,6 @@
 ---
 title: "simpleRegress"
-author: "put your name here"
+author: "Zaira Gomez"
 date: "Fall 2020"
 output: html_document
 ---
@@ -26,11 +26,19 @@ summary.lm(simp)
 
 ## now predict the length of a bear who has a neck of 17, 22 and 26
 
-
 ```{r}
 new <- data.frame(NECK=c(17,22,26))
 predict(simp,new)
 predict(simp,new,se.fit=TRUE)
 ```
 ## Surely there is another variable that can better predict LENGTH than NECK. Find one and compare its performance to that of neck by it value of Adjusted-Rsquared (bigger is better).
+```{r}
+pairs(bears)
+```
+```{r}
+headlen <- lm(LENGTH~HEADLEN,data=bears)
+plot(LENGTH~HEADLEN,data=bears)
+abline(headlen)
+summary.lm(headlen)
+```
 
